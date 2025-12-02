@@ -1,0 +1,50 @@
+{
+  "name": "electron-window-manager-kit",
+  "version": "1.0.0",
+  "description": "A robust window manager for Electron applications",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "build:vite": "vite build",
+    "dev:vite": "vite build --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "files": [
+    "dist"
+  ],
+  "peerDependencies": {
+    "electron": ">=12.0.0"
+  },
+  "dependencies": {
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^29.0.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-typescript": "^12.3.0",
+    "@types/node": "^18.0.0",
+    "@types/uuid": "^9.0.0",
+    "electron": "^25.0.0",
+    "rollup": "^4.53.3",
+    "rollup-plugin-dts": "^6.3.0",
+    "tslib": "^2.8.1",
+    "typescript": "^5.0.0",
+    "vite": "^4.0.0",
+    "vite-plugin-dts": "^3.0.0"
+  },
+  "author": "haobaic",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/haobaic/electron-window-manager.git"
+  },
+  "keywords": [
+    "electron",
+    "window-manager",
+    "typescript",
+    "window-management"
+  ]
+}
