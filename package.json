@@ -1,7 +1,7 @@
 {
-  "name": "electron-window-manager-kit",
+  "name": "electron-infra-kit",
   "version": "1.0.0",
-  "description": "A robust window manager for Electron applications",
+  "description": "A comprehensive infrastructure kit for Electron applications, featuring a robust window manager with state persistence, inter-window communication, and full TypeScript support.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -39,7 +39,7 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/haobaic/electron-window-manager.git"
+    "url": "https://github.com/haobaic/electron-infra-kit.git"
   },
   "keywords": [
     "electron",

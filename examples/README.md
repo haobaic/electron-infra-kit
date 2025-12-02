@@ -1,6 +1,6 @@
 # 示例运行指南
 
-这个目录包含了 `electron-window-manager-kit` 的使用示例。
+这个目录包含了 `electron-infra-kit` 的使用示例。
 
 由于本项目本身是一个库，示例代码直接引用了构建后的 `dist/index.umd.js` 文件。
 

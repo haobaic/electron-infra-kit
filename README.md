@@ -1,4 +1,4 @@
-# Electron Window Manager Kit
+# Electron Infra Kit
 
 一个基于 TypeScript 的健壮 Electron 窗口管理库，旨在简化多窗口应用的开发流程。
 
@@ -13,11 +13,11 @@
 ## 📦 安装
 
 ```bash
-npm install electron-window-manager-kit
+npm install electron-infra-kit
 # 或者
-pnpm add electron-window-manager-kit
+pnpm add electron-infra-kit
 # 或者
-yarn add electron-window-manager-kit
+yarn add electron-infra-kit
 ```
 
 ## 🚀 使用指南

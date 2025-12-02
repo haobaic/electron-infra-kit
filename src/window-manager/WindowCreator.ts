@@ -1,4 +1,4 @@
-import { delay } from './utils'
+import { delay } from '../utils'
 import { BrowserWindow } from 'electron'
 
 export interface WindowManagerApi {
@@ -18,7 +18,7 @@ interface Frame {
 }
 
 interface FrameConstructor {
-  new (): Frame
+  new(): Frame
 }
 
 // 新增通用窗口创建类
@@ -42,21 +42,23 @@ export default class WindowCreator<T = any> {
     this.extraOptions = extraOptions
   }
 
-  private createWindow(): string {
+  private createWindow(): { winId: string; isNew: boolean } {
+    let isNew = false
     if (!this.api.window.hasById(this.winId)) {
       const windowInstance = new this.FrameClass()
       const options = this.winId
         ? {
-            windowId: this.winId,
-            ...(this.extraOptions?.(this.data.data) || {})
-          }
+          windowId: this.winId,
+          ...(this.extraOptions?.(this.data.data) || {})
+        }
         : this.data.data
       this.winId = windowInstance.create(options)
+      isNew = true
     }
-    return this.winId
+    return { winId: this.winId, isNew }
   }
 
-  private showWindow(winId: string, retryCount = 0): void {
+  private showWindow(winId: string, isNew: boolean, retryCount = 0): void {
     if (this.api.window?.isDestroyed(winId)) {
       // 防止无限递归，限制重试次数
       if (retryCount >= 3) {
@@ -69,20 +71,26 @@ export default class WindowCreator<T = any> {
       this.api.window?.deleteByName(`window-${winId}`)
       this.api.window?.deleteById(winId)
       delay(500).then(() => {
-        this.winId = this.createWindow()
-        this.showWindow(this.winId, retryCount + 1)
+        const result = this.createWindow()
+        this.showWindow(result.winId, result.isNew, retryCount + 1)
       })
     } else {
       const win = this.api.window?.getTargetWindow(winId)
       if (win) {
-        this.api.window.show(win, winId)
+        if (isNew) {
+          win.once('ready-to-show', () => {
+            this.api.window.show(win, winId)
+          })
+        } else {
+          this.api.window.show(win, winId)
+        }
       }
     }
   }
 
   public createAndShow(): string {
-    this.createWindow()
-    this.showWindow(this.winId)
+    const { isNew } = this.createWindow()
+    this.showWindow(this.winId, isNew)
     return this.winId
   }
 }

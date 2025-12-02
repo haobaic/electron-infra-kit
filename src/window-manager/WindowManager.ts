@@ -1,4 +1,4 @@
-import { BrowserWindow, shell, BrowserWindowConstructorOptions } from 'electron'
+import { BrowserWindow, shell, BrowserWindowConstructorOptions, app } from 'electron'
 import WindowEvents from './WindowEvents'
 
 export interface WindowManagerConfig {
@@ -7,22 +7,36 @@ export interface WindowManagerConfig {
   isLinux?: boolean
 }
 
+const IS_DEV = !app.isPackaged
+
 export default class WindowManager extends WindowEvents {
-  protected config: WindowManagerConfig
+  protected config: WindowManagerConfig = {}
   private ready: boolean = false
 
-  constructor(config: WindowManagerConfig = {}) {
-    super()
-    this.config = config
-  }
-
   create(
-    config?: BrowserWindowConstructorOptions & {
+    config: BrowserWindowConstructorOptions & {
       name?: string
       windowId?: string
+      isDevelopment?: boolean
+      defaultConfig?: BrowserWindowConstructorOptions
       [key: string]: any
-    }
+    } = {}
   ): string {
+    // Initialize config from create parameters
+    if (config.defaultConfig) {
+      this.config.defaultConfig = config.defaultConfig
+    }
+
+    // Use nullish coalescing to allow explicit false
+    // Use module-level constant IS_DEV to lock environment state
+    this.config.isDevelopment = config.isDevelopment ?? IS_DEV
+
+    console.log('Current Environment:', {
+      appIsPackaged: app.isPackaged,
+      cachedIsDev: IS_DEV,
+      finalConfigIsDev: this.config.isDevelopment
+    })
+
     if (
       (config?.name && this.hasByName(config?.name)) ||
       (config?.windowId && this.hasById(config?.windowId))
@@ -50,15 +64,15 @@ export default class WindowManager extends WindowEvents {
   }
 
   protected getDefaultWindowConfig(): BrowserWindowConstructorOptions {
-     return this.config.defaultConfig || {
-       width: 800,
-       height: 600,
-       show: false,
-       webPreferences: {
-         nodeIntegration: true,
-         contextIsolation: false
-       }
-     }
+    return this.config.defaultConfig || {
+      width: 800,
+      height: 600,
+      show: false,
+      webPreferences: {
+        nodeIntegration: true,
+        contextIsolation: false
+      }
+    }
   }
 
   protected configureWindowBehavior(
