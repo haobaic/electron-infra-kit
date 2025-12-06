@@ -1,5 +1,5 @@
 import { ipcMain, IpcMainEvent, IpcMainInvokeEvent } from 'electron'
-import Logger from '../logger'
+import Logger from '@/logger'
 import type { EmptyFunc, IPCEventHandler, IPCHandleHandler } from './ipc.type'
 
 const emptyFunc: EmptyFunc = () => { }

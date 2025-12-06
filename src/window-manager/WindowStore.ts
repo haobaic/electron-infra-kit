@@ -1,64 +1,129 @@
 import { BrowserWindow } from 'electron'
 import { v4 as uuidv4 } from 'uuid'
+import Logger  from '@/logger'
+
 /**
- * WindowStore - 窗口存储管理类
+ * WindowStore - Window state management class
+ * WindowStore - 窗口状态管理类
  *
- * 窗口命名规范:
- * - windowId: UUID 格式的唯一标识符，如 "550e8400-e29b-41d4-a716-446655440000"
- * - windowName: 业务语义化名称，如 "main-frame", "setting-window"
+ * Manages the lifecycle and state of Electron windows including:
+ * 管理 Electron 窗口的生命周期和状态，包括：
+ * - Window instance tracking (窗口实例追踪)
+ * - Window ID and Name mapping (窗口 ID 和名称映射)
+ * - Main window management (主窗口管理)
  *
- * 注意：windowName 必须唯一，会在创建时验证
+ * Window naming convention / 窗口命名规范:
+ * - windowId: UUID format unique identifier (UUID 格式的唯一标识符)
+ * - windowName: Semantic name (e.g., "main-frame", "setting-window") (语义化名称)
+ *
+ * @class
  */
 export default class WindowStore {
-  // 窗口数量限制
-  private static readonly MAX_WINDOWS = 50
-
-  // ✅ 静态属性：所有实例共享
-  protected static windows: Map<string, BrowserWindow> = new Map()
-  protected static windowNames: Map<string, string> = new Map()
-  // 反向索引：提升查询性能
-  protected static windowIds: Map<string, string> = new Map() // windowId -> windowName
-  protected static windowInstanceIds: Map<BrowserWindow, string> = new Map() // window -> windowId
-  // 实例追踪：存储 WindowManager 子类实例
-  protected static instances: Map<string, WindowStore> = new Map() // windowId -> WindowStore instance
-  protected static mainWindow: BrowserWindow | null = null
-
-  // ✅ 提供实例访问器
-  public get mainWindow(): BrowserWindow | null {
-    return WindowStore.mainWindow
-  }
-
-  // ✅ 可选：设置器用于赋值
-  protected set mainWindow(window: BrowserWindow | null) {
-    WindowStore.mainWindow = window
-  }
-
-  // 窗口创建与注册
   /**
-   * 创建并注册一个新的窗口
-   * @param window 窗口对象
-   * @param config 窗口配置，包含名称和窗口ID，可选
-   * @returns 窗口ID
+   * Maximum number of windows allowed
+   * 允许的最大窗口数量
+   * @private
+   */
+  private readonly MAX_WINDOWS = 50
+
+  /**
+   * Logger instance for internal logging
+   * 内部日志记录器实例
+   * @protected
+   */
+  protected logger: Logger
+
+  /**
+   * Map of window ID to BrowserWindow instance
+   * 窗口 ID 到 BrowserWindow 实例的映射
+   * @protected
+   */
+  protected windows: Map<string, BrowserWindow> = new Map()
+
+  /**
+   * Map of window name to window ID
+   * 窗口名称到窗口 ID 的映射
+   * @protected
+   */
+  protected windowNames: Map<string, string> = new Map()
+
+  /**
+   * Map of window ID to window name (Reverse index)
+   * 窗口 ID 到窗口名称的映射（反向索引）
+   * @protected
+   */
+  protected windowIds: Map<string, string> = new Map()
+
+  /**
+   * Map of BrowserWindow instance to window ID
+   * BrowserWindow 实例到窗口 ID 的映射
+   * @protected
+   */
+  protected windowInstanceIds: Map<BrowserWindow, string> = new Map()
+
+  /**
+   * The main window instance reference
+   * 主窗口实例引用
+   * @protected
+   */
+  protected _mainWindow: BrowserWindow | null = null
+
+  /**
+   * Creates an instance of WindowStore
+   * 创建 WindowStore 实例
+   */
+  constructor() {
+    this.logger = new Logger('WindowStore')
+  }
+
+  /**
+   * Gets the main window instance
+   * 获取主窗口实例
+   * @returns The main BrowserWindow instance or null (主窗口实例或 null)
+   */
+  public get mainWindow(): BrowserWindow | null {
+    return this._mainWindow
+  }
+
+  /**
+   * Sets the main window instance
+   * 设置主窗口实例
+   * @param window - The BrowserWindow instance to set as main (要设置为主窗口的实例)
+   */
+  protected set mainWindow(window: BrowserWindow | null) {
+    this._mainWindow = window
+  }
+
+  /**
+   * Creates and registers a new window
+   * 创建并注册新窗口
+   *
+   * @param window - The BrowserWindow instance to register (要注册的窗口实例)
+   * @param config - Optional configuration including name and windowId (可选配置，包含名称和 ID)
+   * @returns The unique window ID (唯一窗口 ID)
+   * @throws Error if maximum window limit is reached (如果达到最大窗口限制则抛出错误)
    */
   createWindow(
     window: BrowserWindow,
     config?: { name?: string; windowId?: string }
   ): string {
-    // 检查窗口数量限制
-    if (WindowStore.windows.size >= WindowStore.MAX_WINDOWS) {
-      throw new Error(
-        `Maximum window limit (${WindowStore.MAX_WINDOWS}) reached`
+    // Check window limit / 检查窗口限制
+    if (this.windows.size >= this.MAX_WINDOWS) {
+      const error = new Error(
+        `Maximum window limit (${this.MAX_WINDOWS}) reached`
       )
+      this.logger.error(error.message)
+      throw error
     }
 
     const windowId = config?.windowId || uuidv4()
     let windowName = config?.name || `window-${windowId}`
 
-    // 验证窗口名称，如果重复则自动生成唯一名称
+    // Validate window name / 验证窗口名称
     try {
       windowName = this.validateWindowName(windowName)
     } catch {
-      console.warn(
+      this.logger.warn(
         `Window name "${windowName}" already exists, generating unique name`
       )
       windowName = `${windowName}-${Date.now()}`
@@ -68,219 +133,229 @@ export default class WindowStore {
     return windowId
   }
 
-  // 窗口获取
   /**
-   * 获取所有窗口的数量
-   * @returns 窗口数量
+   * Gets the total number of managed windows
+   * 获取受管窗口的总数
+   * @returns The count of windows (窗口数量)
    */
   getWindowCount(): number {
-    return WindowStore.windows.size
+    return this.windows.size
   }
 
   /**
-   * 获取所有窗口的ID列表
-   * @returns 窗口ID列表
+   * Gets all window IDs
+   * 获取所有窗口 ID
+   * @returns Array of window IDs (窗口 ID 数组)
    */
   getAllWindowKeys(): string[] {
-    return Array.from(WindowStore.windows.keys())
+    return Array.from(this.windows.keys())
   }
 
   /**
-   * 获取所有窗口对象列表
-   * @returns 窗口对象列表
+   * Gets all BrowserWindow instances
+   * 获取所有 BrowserWindow 实例
+   * @returns Array of BrowserWindow instances (BrowserWindow 实例数组)
    */
   getAllWindows(): BrowserWindow[] {
-    return Array.from(WindowStore.windows.values())
+    return Array.from(this.windows.values())
   }
 
   /**
-   * 获取所有窗口名称和ID的映射
-   * @returns 窗口名称和ID的映射
+   * Gets the map of window names to IDs
+   * 获取窗口名称到 ID 的映射
+   * @returns Map of window names to IDs (窗口名称到 ID 的映射)
    */
   getWindowNames(): Map<string, string> {
-    return WindowStore.windowNames
+    return this.windowNames
   }
 
   /**
-   * 根据窗口ID获取窗口名称
-   * @param windowId 窗口ID
-   * @returns 窗口名称或undefined
+   * Gets the window name by its ID
+   * 根据 ID 获取窗口名称
+   * @param windowId - The unique window ID (唯一窗口 ID)
+   * @returns The window name or undefined (窗口名称或 undefined)
    */
   getNameByWindowId(windowId: string): string | undefined {
-    return WindowStore.windowIds.get(windowId)
+    return this.windowIds.get(windowId)
   }
 
   /**
-   * 根据窗口ID或名称获取目标窗口
-   * @param windowId 窗口ID或名称，可选
-   * @returns 目标窗口或undefined
+   * Gets a target window by ID or name
+   * 根据 ID 或名称获取目标窗口
+   *
+   * If no argument is provided, returns the current focused window or main window.
+   * 如果未提供参数，则返回当前聚焦窗口或主窗口。
+   *
+   * @param windowId - Optional window ID or name (可选的窗口 ID 或名称)
+   * @returns The BrowserWindow instance or undefined (BrowserWindow 实例或 undefined)
    */
   getTargetWindow(windowId?: string): BrowserWindow | undefined {
     if (!windowId) {
       return this.getCurrentWindow()
     }
 
-    // 先检查是否是 ID
+    // Check if it's an ID / 检查是否为 ID
     const windowById = this.getWindowById(windowId)
     if (windowById) return windowById
 
-    // 再检查是否是名称
+    // Check if it's a name / 检查是否为名称
     return this.getWindowByName(windowId)
   }
 
   /**
-   * 获取当前聚焦的窗口
-   * @returns 当前聚焦的窗口或undefined
+   * Gets the current focused window or main window
+   * 获取当前聚焦窗口或主窗口
+   * @returns The BrowserWindow instance or undefined (BrowserWindow 实例或 undefined)
    */
   getCurrentWindow(): BrowserWindow | undefined {
     const focusedWindow = BrowserWindow.getFocusedWindow()
     if (focusedWindow && !focusedWindow.isDestroyed()) return focusedWindow
-    return WindowStore.mainWindow ?? undefined
+    return this._mainWindow ?? undefined
   }
 
   /**
-   * 根据窗口名称获取窗口ID
-   * @param name 窗口名称
-   * @returns 窗口ID或undefined
+   * Gets a window ID by its name
+   * 根据名称获取窗口 ID
+   * @param name - The window name (窗口名称)
+   * @returns The window ID or undefined (窗口 ID 或 undefined)
    */
   getWindowByNameId(name: string): string | undefined {
-    const windowId = WindowStore.windowNames.get(name)
+    const windowId = this.windowNames.get(name)
     return windowId ? windowId : undefined
   }
 
   /**
-   * 根据窗口名称获取窗口对象
-   * @param name 窗口名称
-   * @returns 窗口对象或undefined
+   * Gets a window instance by its name
+   * 根据名称获取窗口实例
+   * @param name - The window name (窗口名称)
+   * @returns The BrowserWindow instance or undefined (BrowserWindow 实例或 undefined)
    */
   getWindowByName(name: string): BrowserWindow | undefined {
     const windowId = this.getWindowByNameId(name)
-    return windowId ? WindowStore.windows.get(windowId) : undefined
+    return windowId ? this.windows.get(windowId) : undefined
   }
 
   /**
-   * 检查是否存在指定名称的窗口
-   * @param proposedName 窗口名称
-   * @returns 是否存在指定名称的窗口
+   * Checks if a window exists by name
+   * 检查指定名称的窗口是否存在
+   * @param proposedName - The name to check (要检查的名称)
+   * @returns True if exists, false otherwise (如果存在返回 true，否则返回 false)
    */
   hasByName(proposedName: string): boolean {
-    return WindowStore.windowNames.has(proposedName)
+    return this.windowNames.has(proposedName)
   }
+
   /**
-   * 删除指定名称的窗口
-   * @param proposedName 窗口名称
-   * @returns 删除指定名称的窗口
+   * Deletes a window record by name
+   * 根据名称删除窗口记录
+   * @param proposedName - The window name (窗口名称)
+   * @returns True if deleted (如果删除成功返回 true)
    */
   deleteByName(proposedName: string): boolean {
-    return WindowStore.windowNames.delete(proposedName)
+    return this.windowNames.delete(proposedName)
   }
 
   /**
-   * 根据窗口ID获取窗口对象
-   * @param windowId 窗口ID
-   * @returns 窗口对象或undefined
+   * Gets a window instance by ID
+   * 根据 ID 获取窗口实例
+   * @param windowId - The window ID (窗口 ID)
+   * @returns The BrowserWindow instance or undefined (BrowserWindow 实例或 undefined)
    */
   getWindowById(windowId: string): BrowserWindow | undefined {
-    return WindowStore.windows.get(windowId)
+    return this.windows.get(windowId)
   }
 
   /**
-   * 根据窗口ID获取 WindowStore (或子类) 实例
-   * @param windowId 窗口ID
-   * @returns 实例对象或undefined
-   */
-  getInstance<T extends WindowStore = WindowStore>(
-    windowId: string
-  ): T | undefined {
-    return WindowStore.instances.get(windowId) as T | undefined
-  }
-
-  /**
-   * 检查是否存在指定ID的窗口
-   * @param windowId 窗口ID
-   * @returns 是否存在指定ID的窗口
+   * Checks if a window exists by ID
+   * 检查指定 ID 的窗口是否存在
+   * @param windowId - The window ID (窗口 ID)
+   * @returns True if exists (如果存在返回 true)
    */
   hasById(windowId: string): boolean {
-    return WindowStore.windows.has(windowId)
+    return this.windows.has(windowId)
   }
 
   /**
-   * 删除指定ID的窗口
-   * @param windowId 窗口ID
-   * @returns 删除指定ID的窗口
+   * Deletes a window record by ID
+   * 根据 ID 删除窗口记录
+   * @param windowId - The window ID (窗口 ID)
+   * @returns True if deleted (如果删除成功返回 true)
    */
   deleteById(windowId: string): boolean {
-    return WindowStore.windows.delete(windowId)
+    return this.windows.delete(windowId)
   }
 
   /**
-   * 根据窗口对象获取窗口ID
-   * @param window 窗口对象
-   * @returns 窗口ID或undefined
+   * Gets the window ID for a given BrowserWindow instance
+   * 获取给定 BrowserWindow 实例的窗口 ID
+   * @param window - The BrowserWindow instance (BrowserWindow 实例)
+   * @returns The window ID or undefined (窗口 ID 或 undefined)
    */
   getWindowId(window: BrowserWindow): string | undefined {
-    return WindowStore.windowInstanceIds.get(window)
+    return this.windowInstanceIds.get(window)
   }
 
   /**
-   * 获取主窗口对象
-   * @returns 主窗口对象或null
+   * Gets the main window
+   * 获取主窗口
+   * @returns The main BrowserWindow instance or null (主窗口实例或 null)
    */
   getMainWindow(): BrowserWindow | null {
-    return WindowStore.mainWindow
+    return this._mainWindow
   }
 
-  // 窗口操作
   /**
+   * Updates a window's name
    * 更新窗口名称
-   * @param windowId 窗口ID
-   * @param newName 新窗口名称
+   * @param windowId - The window ID (窗口 ID)
+   * @param newName - The new name for the window (窗口新名称)
    */
   updateWindowName(windowId: string, newName: string): void {
     const currentName = this.getNameByWindowId(windowId)
-    if (currentName) WindowStore.windowNames.delete(currentName)
-    WindowStore.windowNames.set(newName, windowId)
-    WindowStore.windowIds.set(windowId, newName)
+    if (currentName) this.windowNames.delete(currentName)
+    this.windowNames.set(newName, windowId)
+    this.windowIds.set(windowId, newName)
   }
 
   /**
-   * 移除并关闭指定窗口
-   * @param windowId 窗口ID
+   * Removes and closes a window
+   * 移除并关闭窗口
+   * @param windowId - The window ID (窗口 ID)
    */
   removeWindow(windowId: string): void {
     const name = this.getNameByWindowId(windowId)
-    if (name) WindowStore.windowNames.delete(name)
+    if (name) this.windowNames.delete(name)
 
-    const window = WindowStore.windows.get(windowId)
+    const window = this.windows.get(windowId)
     if (window && !window.isDestroyed()) {
       try {
-        // 清理反向索引
-        WindowStore.windowInstanceIds.delete(window)
+        // Clear reverse index / 清理反向索引
+        this.windowInstanceIds.delete(window)
 
         window.close()
-        // destroy 通常在 close 后自动触发，但为了保险可保留
+        // destroy is usually called automatically after close, but keep for safety
+        // destroy 通常在 close 后自动调用，但为了安全起见保留
         if (!window.isDestroyed()) {
           window.destroy()
         }
       } catch (error) {
-        console.error(`Failed to remove window ${windowId}:`, error)
+        this.logger.error(`Failed to remove window ${windowId}: ${error}`)
       } finally {
-        WindowStore.windows.delete(windowId)
-        WindowStore.windowIds.delete(windowId)
-        WindowStore.instances.delete(windowId) // 清理实例引用
-        if (WindowStore.mainWindow === window) {
-          WindowStore.mainWindow = null
+        this.windows.delete(windowId)
+        this.windowIds.delete(windowId)
+        if (this._mainWindow === window) {
+          this._mainWindow = null
         }
       }
     }
   }
 
-  // 辅助方法
   /**
+   * Validates if a window name is unique
    * 验证窗口名称是否唯一
-   * @param proposedName 窗口名称
-   * @returns 验证后的窗口名称
-   * @throws 如果窗口名称已存在，则抛出错误
+   * @param proposedName - The name to validate (要验证的名称)
+   * @returns The valid name (有效的名称)
+   * @throws Error if name already exists (如果名称已存在则抛出错误)
    */
   private validateWindowName(proposedName: string): string {
     if (this.hasByName(proposedName)) {
@@ -290,25 +365,25 @@ export default class WindowStore {
   }
 
   /**
-   * 注册窗口
-   * @param id 窗口ID
-   * @param name 窗口名称
-   * @param window 窗口对象
+   * Registers a window in the store
+   * 在存储中注册窗口
+   * @param id - Window ID (窗口 ID)
+   * @param name - Window name (窗口名称)
+   * @param window - BrowserWindow instance (BrowserWindow 实例)
    */
   private registerWindow(
     id: string,
     name: string,
     window: BrowserWindow
   ): void {
-    WindowStore.windows.set(id, window)
-    WindowStore.windowNames.set(name, id)
-    // 维护反向索引
-    WindowStore.windowIds.set(id, name)
-    WindowStore.windowInstanceIds.set(window, id)
-    // 存储实例引用
-    WindowStore.instances.set(id, this)
-    if (!WindowStore.mainWindow) {
-      WindowStore.mainWindow = window
+    this.windows.set(id, window)
+    this.windowNames.set(name, id)
+    // Maintain reverse index / 维护反向索引
+    this.windowIds.set(id, name)
+    this.windowInstanceIds.set(window, id)
+    
+    if (!this._mainWindow) {
+      this._mainWindow = window
     }
   }
 }

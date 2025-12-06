@@ -1,35 +1,36 @@
 {
   "$schema": "https://typedoc.org/schema.json",
-  "entryPoints": ["src/index.ts"],
+  "entryPoints": ["src"],
+  "entryPointStrategy": "expand",
   "out": "docs/api",
   "plugin": ["typedoc-plugin-markdown"],
   "name": "Electron Infra Toolkit API 文档",
   "includeVersion": true,
-  "readme": "README.md",
+  "readme": "none",
+  "exclude": ["src/index.ts", "**/*.test.ts", "**/*.spec.ts"],
   "excludeNotDocumented": false,
   "excludePrivate": true,
   "excludeProtected": false,
-  "sort": ["source-order"],
-  "navigation": {
-    "includeCategories": true,
-    "includeGroups": true
-  },
-  "defaultCategory": "未分类",
-  "categoryOrder": [
-    "窗口管理",
-    "进程间通信",
-    "多窗口同步",
-    "日志模块",
-    "工具函数",
-    "未分类"
-  ],
-  "preserveLinkText": true,
-  "expandObjects": true,
+  "outputFileStrategy": "modules",
+  "flattenOutputFiles": false,
   "hideGenerator": true,
-  "excludeInternal": false,
-  "validation": {
-    "notExported": false,
-    "notDocumented": false,
-    "invalidLink": true
+  "lang": "zh",
+  "navigation": {
+    "includeCategories": false,
+    "includeGroups": false
+  },
+  "textContentMappings": {
+    "kind.class.singular": "类",
+    "kind.class.plural": "类",
+    "kind.interface.singular": "接口",
+    "kind.interface.plural": "接口",
+    "kind.function.singular": "函数",
+    "kind.function.plural": "函数",
+    "kind.variable.singular": "变量",
+    "kind.variable.plural": "变量",
+    "kind.typeAlias.singular": "类型别名",
+    "kind.typeAlias.plural": "类型别名",
+    "label.index": "索引",
+    "label.module": "模块"
   }
 }

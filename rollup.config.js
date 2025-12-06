@@ -37,6 +37,15 @@ module.exports = [
         // 生成类型定义文件
         input: 'src/index.ts',
         output: [{ file: 'dist/index.d.ts', format: 'es' }],
-        plugins: [dts()],
+        plugins: [
+            dts({
+                compilerOptions: {
+                    baseUrl: "./",
+                    paths: {
+                        "@/*": ["src/*"]
+                    }
+                }
+            })
+        ],
     },
 ];

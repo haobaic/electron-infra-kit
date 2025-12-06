@@ -15,6 +15,9 @@ importers:
         specifier: ^9.0.0
         version: 9.0.1
     devDependencies:
+      '@rollup/plugin-alias':
+        specifier: ^6.0.0
+        version: 6.0.0(rollup@4.53.3)
       '@rollup/plugin-commonjs':
         specifier: ^29.0.0
         version: 29.0.0(rollup@4.53.3)
@@ -25,8 +28,8 @@ importers:
         specifier: ^12.3.0
         version: 12.3.0(rollup@4.53.3)(tslib@2.8.1)(typescript@5.9.3)
       '@types/node':
-        specifier: ^18.0.0
-        version: 18.19.130
+        specifier: ^22.0.0
+        version: 22.19.1
       '@types/uuid':
         specifier: ^9.0.0
         version: 9.0.8
@@ -53,10 +56,10 @@ importers:
         version: 5.9.3
       vite:
         specifier: ^4.0.0
-        version: 4.5.14(@types/node@18.19.130)
+        version: 4.5.14(@types/node@22.19.1)
       vite-plugin-dts:
         specifier: ^3.0.0
-        version: 3.9.1(@types/node@18.19.130)(rollup@4.53.3)(typescript@5.9.3)(vite@4.5.14(@types/node@18.19.130))
+        version: 3.9.1(@types/node@22.19.1)(rollup@4.53.3)(typescript@5.9.3)(vite@4.5.14(@types/node@22.19.1))
 
 packages:
 
@@ -235,6 +238,15 @@ packages:
 
   '@microsoft/tsdoc@0.14.2':
     resolution: {integrity: sha512-9b8mPpKrfeGRuhFH5iO1iwCLeIIsV6+H1sRfxbkoGXIyQE2BTsPd9zqSqQJ+pv5sJ/hT5M1zvOFL02MnEezFug==}
+
+  '@rollup/plugin-alias@6.0.0':
+    resolution: {integrity: sha512-tPCzJOtS7uuVZd+xPhoy5W4vThe6KWXNmsFCNktaAh5RTqcLiSfT4huPQIXkgJ6YCOjJHvecOAzQxLFhPxKr+g==}
+    engines: {node: '>=20.19.0'}
+    peerDependencies:
+      rollup: '>=4.0.0'
+    peerDependenciesMeta:
+      rollup:
+        optional: true
 
   '@rollup/plugin-commonjs@29.0.0':
     resolution: {integrity: sha512-U2YHaxR2cU/yAiwKJtJRhnyLk7cifnQw0zUpISsocBDoHDJn+HTV74ABqnwr5bEgWUwFZC9oFL6wLe21lHu5eQ==}
@@ -462,6 +474,9 @@ packages:
 
   '@types/node@18.19.130':
     resolution: {integrity: sha512-GRaXQx6jGfL8sKfaIDD6OupbIHBr9jv7Jnaml9tB7l4v068PAOXqfcujMMo5PhbIs6ggR1XODELqahT2R8v0fg==}
+
+  '@types/node@22.19.1':
+    resolution: {integrity: sha512-LCCV0HdSZZZb34qifBsyWlUmok6W7ouER+oQIGBScS8EsZsQbrtFTUrDX4hOl+CS6p7cnNC4td+qrSVGSCTUfQ==}
 
   '@types/resolve@1.20.2':
     resolution: {integrity: sha512-60BCwRFOZCQhDncwQdxxeOEEkbc5dIMccYLwbxsS4TUNeVECQ/pBJ0j09mrHOl/JJvpRPGwO9SvE4nR2Nb/a4Q==}
@@ -998,6 +1013,9 @@ packages:
   undici-types@5.26.5:
     resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
 
+  undici-types@6.21.0:
+    resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
+
   universalify@0.1.2:
     resolution: {integrity: sha512-rBJeI5CXAlmy1pV+617WB9J63U6XcazHHF2f2dbJix4XzpUF0RS3Zbj0FGIOCAva5P/d/GBOYaACQ1w+0azUkg==}
     engines: {node: '>= 4.0.0'}
@@ -1191,23 +1209,23 @@ snapshots:
 
   '@jridgewell/sourcemap-codec@1.5.5': {}
 
-  '@microsoft/api-extractor-model@7.28.13(@types/node@18.19.130)':
+  '@microsoft/api-extractor-model@7.28.13(@types/node@22.19.1)':
     dependencies:
       '@microsoft/tsdoc': 0.14.2
       '@microsoft/tsdoc-config': 0.16.2
-      '@rushstack/node-core-library': 4.0.2(@types/node@18.19.130)
+      '@rushstack/node-core-library': 4.0.2(@types/node@22.19.1)
     transitivePeerDependencies:
       - '@types/node'
 
-  '@microsoft/api-extractor@7.43.0(@types/node@18.19.130)':
+  '@microsoft/api-extractor@7.43.0(@types/node@22.19.1)':
     dependencies:
-      '@microsoft/api-extractor-model': 7.28.13(@types/node@18.19.130)
+      '@microsoft/api-extractor-model': 7.28.13(@types/node@22.19.1)
       '@microsoft/tsdoc': 0.14.2
       '@microsoft/tsdoc-config': 0.16.2
-      '@rushstack/node-core-library': 4.0.2(@types/node@18.19.130)
+      '@rushstack/node-core-library': 4.0.2(@types/node@22.19.1)
       '@rushstack/rig-package': 0.5.2
-      '@rushstack/terminal': 0.10.0(@types/node@18.19.130)
-      '@rushstack/ts-command-line': 4.19.1(@types/node@18.19.130)
+      '@rushstack/terminal': 0.10.0(@types/node@22.19.1)
+      '@rushstack/ts-command-line': 4.19.1(@types/node@22.19.1)
       lodash: 4.17.21
       minimatch: 3.0.8
       resolve: 1.22.11
@@ -1225,6 +1243,10 @@ snapshots:
       resolve: 1.19.0
 
   '@microsoft/tsdoc@0.14.2': {}
+
+  '@rollup/plugin-alias@6.0.0(rollup@4.53.3)':
+    optionalDependencies:
+      rollup: 4.53.3
 
   '@rollup/plugin-commonjs@29.0.0(rollup@4.53.3)':
     dependencies:
@@ -1331,7 +1353,7 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.53.3':
     optional: true
 
-  '@rushstack/node-core-library@4.0.2(@types/node@18.19.130)':
+  '@rushstack/node-core-library@4.0.2(@types/node@22.19.1)':
     dependencies:
       fs-extra: 7.0.1
       import-lazy: 4.0.0
@@ -1340,23 +1362,23 @@ snapshots:
       semver: 7.5.4
       z-schema: 5.0.5
     optionalDependencies:
-      '@types/node': 18.19.130
+      '@types/node': 22.19.1
 
   '@rushstack/rig-package@0.5.2':
     dependencies:
       resolve: 1.22.11
       strip-json-comments: 3.1.1
 
-  '@rushstack/terminal@0.10.0(@types/node@18.19.130)':
+  '@rushstack/terminal@0.10.0(@types/node@22.19.1)':
     dependencies:
-      '@rushstack/node-core-library': 4.0.2(@types/node@18.19.130)
+      '@rushstack/node-core-library': 4.0.2(@types/node@22.19.1)
       supports-color: 8.1.1
     optionalDependencies:
-      '@types/node': 18.19.130
+      '@types/node': 22.19.1
 
-  '@rushstack/ts-command-line@4.19.1(@types/node@18.19.130)':
+  '@rushstack/ts-command-line@4.19.1(@types/node@22.19.1)':
     dependencies:
-      '@rushstack/terminal': 0.10.0(@types/node@18.19.130)
+      '@rushstack/terminal': 0.10.0(@types/node@22.19.1)
       '@types/argparse': 1.0.38
       argparse: 1.0.10
       string-argv: 0.3.2
@@ -1395,7 +1417,7 @@ snapshots:
     dependencies:
       '@types/http-cache-semantics': 4.0.4
       '@types/keyv': 3.1.4
-      '@types/node': 18.19.130
+      '@types/node': 22.19.1
       '@types/responselike': 1.0.3
 
   '@types/estree@1.0.8': {}
@@ -1408,17 +1430,21 @@ snapshots:
 
   '@types/keyv@3.1.4':
     dependencies:
-      '@types/node': 18.19.130
+      '@types/node': 22.19.1
 
   '@types/node@18.19.130':
     dependencies:
       undici-types: 5.26.5
 
+  '@types/node@22.19.1':
+    dependencies:
+      undici-types: 6.21.0
+
   '@types/resolve@1.20.2': {}
 
   '@types/responselike@1.0.3':
     dependencies:
-      '@types/node': 18.19.130
+      '@types/node': 22.19.1
 
   '@types/unist@3.0.3': {}
 
@@ -1426,7 +1452,7 @@ snapshots:
 
   '@types/yauzl@2.10.3':
     dependencies:
-      '@types/node': 18.19.130
+      '@types/node': 22.19.1
     optional: true
 
   '@volar/language-core@1.11.1':
@@ -1975,6 +2001,8 @@ snapshots:
 
   undici-types@5.26.5: {}
 
+  undici-types@6.21.0: {}
+
   universalify@0.1.2: {}
 
   uri-js@4.4.1:
@@ -1985,9 +2013,9 @@ snapshots:
 
   validator@13.15.23: {}
 
-  vite-plugin-dts@3.9.1(@types/node@18.19.130)(rollup@4.53.3)(typescript@5.9.3)(vite@4.5.14(@types/node@18.19.130)):
+  vite-plugin-dts@3.9.1(@types/node@22.19.1)(rollup@4.53.3)(typescript@5.9.3)(vite@4.5.14(@types/node@22.19.1)):
     dependencies:
-      '@microsoft/api-extractor': 7.43.0(@types/node@18.19.130)
+      '@microsoft/api-extractor': 7.43.0(@types/node@22.19.1)
       '@rollup/pluginutils': 5.3.0(rollup@4.53.3)
       '@vue/language-core': 1.8.27(typescript@5.9.3)
       debug: 4.4.3
@@ -1996,19 +2024,19 @@ snapshots:
       typescript: 5.9.3
       vue-tsc: 1.8.27(typescript@5.9.3)
     optionalDependencies:
-      vite: 4.5.14(@types/node@18.19.130)
+      vite: 4.5.14(@types/node@22.19.1)
     transitivePeerDependencies:
       - '@types/node'
       - rollup
       - supports-color
 
-  vite@4.5.14(@types/node@18.19.130):
+  vite@4.5.14(@types/node@22.19.1):
     dependencies:
       esbuild: 0.18.20
       postcss: 8.5.6
       rollup: 3.29.5
     optionalDependencies:
-      '@types/node': 18.19.130
+      '@types/node': 22.19.1
       fsevents: 2.3.3
 
   vue-template-compiler@2.7.16:

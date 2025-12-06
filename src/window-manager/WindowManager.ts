@@ -6,13 +6,16 @@ import {
 } from 'electron'
 import WindowEvents from './WindowEvents'
 import type { WindowManagerConfig } from './window-manager.type'
-import IpcBridge from '../ipc-bridge/IpcBridge'
+import IpcBridge from '@/ipc-bridge/IpcBridge'
 import { IpcSetup } from './IpcSetup'
 
 const IS_DEV = !app.isPackaged
 
 /**
+ * WindowManager - Core class for managing Electron windows
  * WindowManager - 管理 Electron 窗口的核心类
+ *
+ * Inherits from WindowEvents to handle window lifecycle events
  * 继承自 WindowEvents 以处理窗口生命周期事件
  */
 export default class WindowManager extends WindowEvents {
@@ -32,8 +35,9 @@ export default class WindowManager extends WindowEvents {
   }
 
   /**
+   * Setup IPC communication
    * 设置 IPC 通信
-   * @param options 可选的 IPC 配置，如果不传则使用 config 中的配置或默认值
+   * @param options - Optional IPC configuration (可选的 IPC 配置)
    */
   public setupIPC(options?: { channel?: string; syncChannel?: string }): void {
     const result = IpcSetup.setup({
@@ -49,9 +53,10 @@ export default class WindowManager extends WindowEvents {
   }
 
   /**
+   * Create a new window
    * 创建一个新窗口
-   * @param config 配置对象
-   * @returns 窗口 ID
+   * @param config - Configuration object (配置对象)
+   * @returns Window ID (窗口 ID)
    */
   create(
     config: BrowserWindowConstructorOptions & {
@@ -62,20 +67,29 @@ export default class WindowManager extends WindowEvents {
       [key: string]: any
     } = {}
   ): string {
+    // Initialize config from creation parameters
     // 从创建参数初始化配置
     if (config.defaultConfig) {
       this.config.defaultConfig = config.defaultConfig
     }
 
+    // Use nullish coalescing to allow explicit false
+    // Use module-level constant IS_DEV to lock environment state
     // 使用空值合并允许显式 false
     // 使用模块级常量 IS_DEV 锁定环境状态
     this.config.isDevelopment = config.isDevelopment ?? IS_DEV
 
-    console.log('当前环境:', {
-      appIsPackaged: app.isPackaged,
-      cachedIsDev: IS_DEV,
-      finalConfigIsDev: this.config.isDevelopment
-    })
+    this.logger.info(
+      `Current Environment / 当前环境: ${JSON.stringify(
+        {
+          appIsPackaged: app.isPackaged,
+          cachedIsDev: IS_DEV,
+          finalConfigIsDev: this.config.isDevelopment
+        },
+        null,
+        2
+      )}`
+    )
 
     let existingWindowId: string | undefined
 
@@ -149,6 +163,11 @@ export default class WindowManager extends WindowEvents {
     })
   }
 
+  /**
+   * Called when window is ready to show
+   * 当窗口准备好显示时调用
+   * @param window - Window instance (窗口实例)
+   */
   readyToShow(window: BrowserWindow): void {
     this.ready = true
     this.setMovable(window)

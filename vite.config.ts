@@ -4,6 +4,11 @@ import { resolve } from 'path'
 import { builtinModules } from 'module'
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src')
+    }
+  },
   build: {
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
@@ -25,7 +30,7 @@ export default defineConfig({
   plugins: [
     dts({
       entryRoot: 'src',
-      outputDir: 'dist',
+      outDir: 'dist',
       // 确保类型定义文件也被正确生成
       insertTypesEntry: true,
     })
